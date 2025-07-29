@@ -17,7 +17,7 @@
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from typing import List
+from typing import List, Optional
 
 import pyrogram
 from pyrogram import raw
@@ -29,7 +29,7 @@ class Start:
     async def start(
         self: "pyrogram.Client", *,
         use_qr: bool = False,
-        except_ids: List[int] = [],
+        except_ids: Optional[List[int]] = None,
     ):
         """Start the client.
 
@@ -41,13 +41,14 @@ class Start:
             You should install ``qrcode`` package if you want to use QR code authorization.
 
         Parameters:
-            use_qr (``bool``, *optional*):
+            use_qr (bool, optional):
                 Use QR code authorization instead of the interactive prompt.
                 For new authorizations only.
                 Defaults to False.
 
-            except_ids (List of ``int``, *optional*):
+            except_ids (List[int], optional):
                 List of already logged-in user IDs, to prevent logging in twice with the same user.
+                Defaults to empty list.
 
         Returns:
             :obj:`~pyrogram.Client`: The started client itself.
@@ -62,7 +63,6 @@ class Start:
 
                 from pyrogram import Client
 
-
                 async def main():
                     app = Client("my_account")
 
@@ -72,8 +72,11 @@ class Start:
 
                 asyncio.run(main())
         """
+        if except_ids is None:
+            except_ids = []
+
         self.load_plugins()
-        
+
         is_authorized = await self.connect()
 
         try:
