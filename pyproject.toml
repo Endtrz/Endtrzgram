@@ -3,13 +3,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "Kurigram"
+name = "Endrtz"
 dynamic = ["version"]
 description = "Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots"
 readme = "README.md"
 requires-python = ">=3.8"
-authors = [{ name = "Dan", email = "dan@pyrogram.org" }]
-maintainers = [{ name = "KurimuzonAkuma" }]
+authors = [{ name = "Endtrz", email = "lord_izana@yahoo.com" }]
+maintainers = [{ name = "Endtrz" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -51,9 +51,9 @@ keywords = [
 [project.urls]
 Homepage = "https://kurigram.live"
 Documentation = "https://docs.kurigram.live"
-Source = "https://github.com/KurimuzonAkuma/pyrogram"
-Issues = "https://github.com/KurimuzonAkuma/pyrogram/issues"
-Community = "https://t.me/kurigram_chat"
+Source = "https://github.com/Endtrz/hydragram"
+Issues = "https://github.com/Endtrz/hydragram/issues"
+Community = "https://t.me/Mita_Support"
 
 [project.optional-dependencies]
 dev = [
