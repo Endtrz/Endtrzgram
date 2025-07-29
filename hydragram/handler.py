@@ -1,6 +1,6 @@
 from functools import wraps
 from typing import Union, List, Optional
-from pyrogram import filters as pyro_filters
+from hydragram import filters as pyro_filters
 from pyrogram.handlers import (
     MessageHandler,
     CallbackQueryHandler,
