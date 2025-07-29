@@ -69,7 +69,7 @@ def handler(
 
         # Try immediate registration
         try:
-            from .client import Client as HydraClient
+            from pyrogram import Client as HydraClient
             pyro_client = HydraClient.get_client()
             register_handler(pyro_client)
         except RuntimeError:
