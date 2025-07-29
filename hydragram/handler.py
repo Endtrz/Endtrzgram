@@ -1,23 +1,22 @@
 from functools import wraps
 from typing import Union, List, Optional
-from pyrogram import filters as hydra_filters
-from hydragram.filters import command as hydra_command
+from pyrogram import filters as pyro_filters
 from pyrogram.handlers import (
-    MessageHandler, CallbackQueryHandler, InlineQueryHandler,
-    ChosenInlineResultHandler, EditedMessageHandler, PollHandler,
-    PollAnswerHandler, ChatMemberUpdatedHandler
+    MessageHandler,
+    CallbackQueryHandler,
+    InlineQueryHandler,
+    ChosenInlineResultHandler,
+    EditedMessageHandler,
+    PollHandler,
+    ChatJoinRequestHandler,
+    ChatMemberUpdatedHandler,
+    PreCheckoutQueryHandler,
+    ShippingQueryHandler,
+    RawUpdateHandler,
+    StoryHandler,
+    UserStatusHandler,
 )
-
-HANDLER_MAP = {
-    "message": MessageHandler,
-    "callback_query": CallbackQueryHandler,
-    "inline_query": InlineQueryHandler,
-    "chosen_inline_result": ChosenInlineResultHandler,
-    "edited_message": EditedMessageHandler,
-    "poll": PollHandler,
-    "poll_answer": PollAnswerHandler,
-    "chat_member_updated": ChatMemberUpdatedHandler
-}
+from pyrogram.types import Message, CallbackQuery
 
 
 def handler(
@@ -33,6 +32,16 @@ def handler(
     extra=None,
     handler_type: str = "message"
 ):
+    """
+    Decorator to register handlers for different Pyrogram handler types.
+
+    commands: command(s) for message handler.
+    group: handler group priority.
+    dev_cmd, owner_cmd, gc_owner, gc_admin: custom filter flags.
+    case_sensitive: command matching case sensitivity.
+    filters: additional filters.
+    handler_type: type of handler to register (e.g. 'message', 'callback_query', etc).
+    """
     def decorator(func):
         @wraps(func)
         async def wrapper(client, update):
@@ -41,15 +50,11 @@ def handler(
         wrapper._client_ref = None
 
         def register_handler(client):
-            handler_cls = HANDLER_MAP.get(handler_type)
-            if not handler_cls:
-                raise ValueError(f"Unsupported handler type: {handler_type}")
-
-            flt = filters or hydra_filters.all
-
-            if commands and handler_type == "message":
+            # Build filters for commands if handler_type is message
+            if commands is not None and handler_type == "message":
+                from .filters import command as hydra_command
                 cmd_list = [commands] if isinstance(commands, str) else commands
-                command_filter = hydra_command(
+                flt = hydra_command(
                     cmd_list,
                     dev_cmd=dev_cmd,
                     owner_cmd=owner_cmd,
@@ -57,22 +62,46 @@ def handler(
                     gc_admin=gc_admin,
                     case_sensitive=case_sensitive
                 )
-                flt = command_filter & flt
+                if filters:
+                    flt = flt & filters
+            else:
+                flt = filters if filters else pyro_filters.all
 
-            client.add_handler(handler_cls(wrapper, flt), group)
+            # Map handler_type to Pyrogram handler class
+            handler_map = {
+                "message": MessageHandler,
+                "callback_query": CallbackQueryHandler,
+                "inline_query": InlineQueryHandler,
+                "chosen_inline_result": ChosenInlineResultHandler,
+                "edited_message": EditedMessageHandler,
+                "poll": PollHandler,
+                "chat_join_request": ChatJoinRequestHandler,
+                "chat_member_updated": ChatMemberUpdatedHandler,
+                "pre_checkout_query": PreCheckoutQueryHandler,
+                "shipping_query": ShippingQueryHandler,
+                "raw_update": RawUpdateHandler,
+                "story": StoryHandler,
+                "user_status": UserStatusHandler,
+            }
+
+            HandlerClass = handler_map.get(handler_type)
+            if HandlerClass is None:
+                raise ValueError(f"Unknown handler_type: {handler_type}")
+
+            client.add_handler(HandlerClass(wrapper, flt), group)
             wrapper._client_ref = client
 
         try:
-            from hydragram.client import Client as HydraClient
-            pyro_client = HydraClient.get_client()
+            from pyrogram.client import Client as PyroClient
+            pyro_client = PyroClient.get_client()
             register_handler(pyro_client)
         except RuntimeError:
-            # Probably being registered later in startup
+            # Client not ready yet, defer registration
             pass
 
         return wrapper
+
     return decorator
 
 
-# Alias for easier usage
 app = handler
