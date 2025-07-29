@@ -9,7 +9,7 @@ Created by @Endtrz
 """
 
 
-__version__ = "0.0.10"
+__version__ = "0.0.11"
 __license__ = "GNU Lesser General Public License v3.0 (LGPL-3.0)"
 __copyright__ = "Copyright (C) 2025-Endtrz<https://github.com/Endtrz>"
 
